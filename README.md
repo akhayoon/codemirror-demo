@@ -170,3 +170,102 @@ export default function App() {
   );
 }
 ```
+
+### 7. Add your own linter
+
+Create an export a file called `lint.js` and paste the following into it (then update depedencies)
+
+```
+import { linter } from '@codemirror/lint';
+import { JSHINT as jshint } from 'jshint';
+
+/**
+ * Sets up the javascript linter. Documentation: https://codemirror.net/examples/lint/
+ */
+export const jsLinter = (lintOptions) => {
+  return linter((view) => {
+    const diagnostics = [];
+    const codeText = view.state.doc.toJSON();
+    jshint(codeText, lintOptions);
+    const errors = jshint?.data().errors;
+
+    if (errors && errors.length > 0) {
+      errors.forEach((error) => {
+        const selectedLine = view.state.doc.line(error.line);
+
+        const diagnostic = {
+          from: selectedLine.from,
+          to: selectedLine.to,
+          severity: 'error',
+          message: error.reason,
+        };
+
+        // Highlight code causing the error
+        if (error.evidence) {
+          const evidenceStartPosition = selectedLine.text.indexOf(
+            error.evidence
+          );
+          diagnostic.from = selectedLine.from + evidenceStartPosition;
+          diagnostic.to =
+            selectedLine.from + evidenceStartPosition + error.evidence.length;
+        }
+
+        diagnostics.push(diagnostic);
+      });
+    }
+    return diagnostics;
+  });
+};
+
+```
+
+Afterwards, update your main App.js code 
+
+```
+import React from 'react';
+import './style.css';
+
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { githubDark } from '@uiw/codemirror-theme-github';
+import { historyField } from '@codemirror/commands';
+import { lintGutter } from '@codemirror/lint';
+
+import { jsLinter } from './linter';
+
+// See [toJSON](https://codemirror.net/docs/ref/#state.EditorState.toJSON) documentation for more details
+const stateFields = { history: historyField };
+
+export default function App() {
+  const serializedState = localStorage.getItem('myEditorState');
+  const value = localStorage.getItem('myValue') || '';
+
+  const lintOptions = {
+    esversion: 11,
+    browser: true,
+  };
+
+  return (
+    <CodeMirror
+      value={value}
+      height={'300px'}
+      theme={githubDark}
+      extensions={[javascript({}), jsLinter(lintOptions), lintGutter()]}
+      initialState={
+        serializedState
+          ? {
+              json: JSON.parse(serializedState || ''),
+              fields: stateFields,
+            }
+          : undefined
+      }
+      onChange={(value, viewUpdate) => {
+        localStorage.setItem('myValue', value);
+
+        const state = viewUpdate.state.toJSON(stateFields);
+        localStorage.setItem('myEditorState', JSON.stringify(state));
+      }}
+    />
+  );
+}
+```
