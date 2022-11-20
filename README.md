@@ -176,47 +176,7 @@ export default function App() {
 Create an export a file called `lint.js` and paste the following into it (then update depedencies)
 
 ```
-import { linter } from '@codemirror/lint';
-import { JSHINT as jshint } from 'jshint';
-
-/**
- * Sets up the javascript linter. Documentation: https://codemirror.net/examples/lint/
- */
-export const jsLinter = (lintOptions) => {
-  return linter((view) => {
-    const diagnostics = [];
-    const codeText = view.state.doc.toJSON();
-    jshint(codeText, lintOptions);
-    const errors = jshint?.data().errors;
-
-    if (errors && errors.length > 0) {
-      errors.forEach((error) => {
-        const selectedLine = view.state.doc.line(error.line);
-
-        const diagnostic = {
-          from: selectedLine.from,
-          to: selectedLine.to,
-          severity: 'error',
-          message: error.reason,
-        };
-
-        // Highlight code causing the error
-        if (error.evidence) {
-          const evidenceStartPosition = selectedLine.text.indexOf(
-            error.evidence
-          );
-          diagnostic.from = selectedLine.from + evidenceStartPosition;
-          diagnostic.to =
-            selectedLine.from + evidenceStartPosition + error.evidence.length;
-        }
-
-        diagnostics.push(diagnostic);
-      });
-    }
-    return diagnostics;
-  });
-};
-
+TBD
 ```
 
 Afterwards, update your main App.js code 
