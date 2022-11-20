@@ -132,6 +132,7 @@ const myTheme = createTheme({
 });
 
 export default myTheme;
+```
 
 ### 7. Save to localStorage with undo history
 
