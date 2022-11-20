@@ -133,4 +133,39 @@ const myTheme = createTheme({
 
 export default myTheme;
 
+### 7. Save to localStorage with undo history
+
+```
+import { historyField } from '@codemirror/commands';
+
+// See [toJSON](https://codemirror.net/docs/ref/#state.EditorState.toJSON) documentation for more details
+const stateFields = { history: historyField };
+
+export default function App() {
+  const serializedState = localStorage.getItem('myEditorState');
+  const value = localStorage.getItem('myValue') || '';
+
+  return (
+    <CodeMirror
+      value={value}
+      height={'300px'}
+      theme={githubDark}
+      extensions={[javascript({})]}
+      initialState={
+        serializedState
+          ? {
+              json: JSON.parse(serializedState || ''),
+              fields: stateFields,
+            }
+          : undefined
+      }
+      onChange={(value, viewUpdate) => {
+        localStorage.setItem('myValue', value);
+
+        const state = viewUpdate.state.toJSON(stateFields);
+        localStorage.setItem('myEditorState', JSON.stringify(state));
+      }}
+    />
+  );
+}
 ```
