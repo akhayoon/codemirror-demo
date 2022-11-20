@@ -229,3 +229,156 @@ export default function App() {
   );
 }
 ```
+
+### 8. Add your own autocomplete
+
+Create a new file called `completions.js` and put the following code inside of it
+
+```
+import { syntaxTree } from '@codemirror/language';
+
+const tagOptions = [
+  'constructor',
+  'deprecated',
+  'link',
+  'param',
+  'returns',
+  'type',
+].map((tag) => ({ label: '@' + tag, type: 'keyword' }));
+
+export function completeJSDoc(context) {
+  let nodeBefore = syntaxTree(context.state).resolveInner(context.pos, -1);
+  if (
+    nodeBefore.name != 'BlockComment' ||
+    context.state.sliceDoc(nodeBefore.from, nodeBefore.from + 3) != '/**'
+  )
+    return null;
+  let textBefore = context.state.sliceDoc(nodeBefore.from, context.pos);
+  let tagBefore = /@\w*$/.exec(textBefore);
+  if (!tagBefore && !context.explicit) return null;
+  return {
+    from: tagBefore ? nodeBefore.from + tagBefore.index : context.pos,
+    options: tagOptions,
+    validFor: /^(@\w*)?$/,
+  };
+}
+```
+
+Your main code should look like this now
+
+```
+import React from 'react';
+import './style.css';
+
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript, javascriptLanguage } from '@codemirror/lang-javascript';
+import { githubDark } from '@uiw/codemirror-theme-github';
+import { historyField } from '@codemirror/commands';
+import { lintGutter } from '@codemirror/lint';
+
+import { jsLinter } from './linter';
+import { completeJSDoc } from './jsDocCompletion';
+
+// See [toJSON](https://codemirror.net/docs/ref/#state.EditorState.toJSON) documentation for more details
+const stateFields = { history: historyField };
+
+export default function App() {
+  const serializedState = localStorage.getItem('myEditorState');
+  const value = localStorage.getItem('myValue') || '';
+
+  const lintOptions = {
+    esversion: 11,
+    browser: true,
+  };
+
+  const jsDocCompletions = javascriptLanguage.data.of({
+    autocomplete: completeJSDoc,
+  });
+
+  return (
+    <CodeMirror
+      value={value}
+      height={'300px'}
+      theme={githubDark}
+      extensions={[
+        javascript({}),
+        jsLinter(lintOptions),
+        lintGutter(),
+        jsDocCompletions,
+      ]}
+      initialState={
+        serializedState
+          ? {
+              json: JSON.parse(serializedState || ''),
+              fields: stateFields,
+            }
+          : undefined
+      }
+      onChange={(value, viewUpdate) => {
+        localStorage.setItem('myValue', value);
+
+        const state = viewUpdate.state.toJSON(stateFields);
+        localStorage.setItem('myEditorState', JSON.stringify(state));
+      }}
+    />
+  );
+}
+
+```
+
+
+### 9. Let's add a completion for the entire global scope
+
+Createa a file called `completeGlobalScope.js`
+
+```
+import { syntaxTree } from '@codemirror/language';
+import { CompletionContext } from '@codemirror/autocomplete';
+
+const completePropertyAfter = ['PropertyName', '.', '?.'];
+const dontCompleteIn = [
+  'TemplateString',
+  'LineComment',
+  'BlockComment',
+  'VariableDefinition',
+  'PropertyDefinition',
+];
+
+export function completeFromGlobalScope(context: CompletionContext) {
+  let nodeBefore = syntaxTree(context.state).resolveInner(context.pos, -1);
+
+  if (
+    completePropertyAfter.includes(nodeBefore.name) &&
+    nodeBefore.parent?.name == 'MemberExpression'
+  ) {
+    let object = nodeBefore.parent.getChild('Expression');
+    if (object?.name == 'VariableName') {
+      let from = /\./.test(nodeBefore.name) ? nodeBefore.to : nodeBefore.from;
+      let variableName = context.state.sliceDoc(object.from, object.to);
+      if (typeof window[variableName] == 'object')
+        return completeProperties(from, window[variableName]);
+    }
+  } else if (nodeBefore.name == 'VariableName') {
+    return completeProperties(nodeBefore.from, window);
+  } else if (context.explicit && !dontCompleteIn.includes(nodeBefore.name)) {
+    return completeProperties(context.pos, window);
+  }
+  return null;
+}
+
+function completeProperties(from: number, object: Object) {
+  let options = [];
+  for (let name in object) {
+    options.push({
+      label: name,
+      type: typeof object[name] == 'function' ? 'function' : 'variable',
+    });
+  }
+  return {
+    from,
+    options,
+    validFor: /^[\w$]*$/,
+  };
+}
+
+````
