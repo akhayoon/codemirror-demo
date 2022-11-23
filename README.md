@@ -8,7 +8,7 @@ Or use your own environment and make sure you have `node` and `yarn` installed t
 
 ### 2. Install the main react-codemirror package
 
-```
+```bash
 yarn add @uiw/react-codemirror
 
 yarn addd @codemirror/lang-javascript
@@ -16,7 +16,7 @@ yarn addd @codemirror/lang-javascript
 
 ### 3. Your basic setup to accept JavaScript
 
-```
+```js
 import React from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
@@ -38,7 +38,7 @@ export default function App() {
 
 ### 4. Add multiple editors supporting HTML and CSS
 
-```
+```js
 import React from 'react';
 import './style.css';
 
@@ -87,7 +87,7 @@ export default function App() {
 
 Install some prebuild themes to play around with 
 
-```
+```js
 import { sublime } from '@uiw/codemirror-theme-sublime';
 import { githubDark } from '@uiw/codemirror-theme-github';
 import { okaidia } from '@uiw/codemirror-theme-okaidia';
@@ -97,7 +97,7 @@ import { okaidia } from '@uiw/codemirror-theme-okaidia';
 
 Create a new file called `customTheme.js`
 
-```
+```js
 import { createTheme } from '@uiw/codemirror-themes';
 import { tags as t } from '@lezer/highlight';
 
@@ -136,7 +136,7 @@ export default myTheme;
 
 ### 7. Save to localStorage with undo history
 
-```
+```js
 import { historyField } from '@codemirror/commands';
 
 // See [toJSON](https://codemirror.net/docs/ref/#state.EditorState.toJSON) documentation for more details
@@ -181,7 +181,7 @@ TBD
 
 Afterwards, update your main App.js code 
 
-```
+```js
 import React from 'react';
 import './style.css';
 
@@ -234,7 +234,7 @@ export default function App() {
 
 Create a new file called `completions.js` and put the following code inside of it
 
-```
+```js
 import { syntaxTree } from '@codemirror/language';
 
 const tagOptions = [
@@ -266,7 +266,7 @@ export function completeJSDoc(context) {
 
 Your main code should look like this now
 
-```
+```js
 import React from 'react';
 import './style.css';
 
@@ -331,7 +331,7 @@ export default function App() {
 
 Createa a file called `completeGlobalScope.js`
 
-```
+```js
 import { syntaxTree } from '@codemirror/language';
 import { CompletionContext } from '@codemirror/autocomplete';
 
