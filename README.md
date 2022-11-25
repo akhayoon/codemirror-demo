@@ -11,7 +11,7 @@ Or use your own environment and make sure you have `node` and `yarn` installed t
 ```bash
 yarn add @uiw/react-codemirror
 
-yarn addd @codemirror/lang-javascript
+yarn add @codemirror/lang-javascript
 ```
 
 ### 3. Your basic setup to accept JavaScript
@@ -91,6 +91,55 @@ Install some prebuild themes to play around with
 import { sublime } from '@uiw/codemirror-theme-sublime';
 import { githubDark } from '@uiw/codemirror-theme-github';
 import { okaidia } from '@uiw/codemirror-theme-okaidia';
+```
+
+Your code should look like this:
+
+```js
+import React from 'react';
+import './style.css';
+
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { html } from '@codemirror/lang-html';
+import { css } from '@codemirror/lang-css';
+
+export default function App() {
+  const onChange = React.useCallback((value, viewUpdate) => {
+    console.log('value:', value);
+  }, []);
+  return (
+    <div>
+      <div>
+        <CodeMirror
+          value="console.log('hello world!');"
+          height="200px"
+          extensions={[javascript({})]}
+          onChange={onChange}
+          theme={sublime}
+        />
+      </div>
+      <div>
+        <CodeMirror
+          value="<html> </html>"
+          height="200px"
+          extensions={[html()]}
+          onChange={onChange}
+          theme={githubDark}
+        />
+      </div>
+      <div>
+        <CodeMirror
+          value="h1 {}"
+          height="200px"
+          extensions={[css()]}
+          onChange={onChange}
+          theme={okaidia}
+        />
+      </div>
+    </div>
+  );
+}
 ```
 
 ### 6. Add your own custom theme
@@ -175,8 +224,48 @@ export default function App() {
 
 Create an export a file called `lint.js` and paste the following into it (then update depedencies)
 
-```
-TBD
+```js
+import { linter } from '@codemirror/lint';
+import { JSHINT as jshint } from 'jshint';
+
+/**
+ * Sets up the javascript linter. Documentation: https://codemirror.net/examples/lint/
+ */
+export const jsLinter = (lintOptions) => {
+  return linter((view) => {
+    const diagnostics = [];
+    const codeText = view.state.doc.toJSON();
+    jshint(codeText, lintOptions);
+    const errors = jshint?.data().errors;
+
+    if (errors && errors.length > 0) {
+      errors.forEach((error) => {
+        const selectedLine = view.state.doc.line(error.line);
+
+        const diagnostic = {
+          from: selectedLine.from,
+          to: selectedLine.to,
+          severity: 'error',
+          message: error.reason,
+        };
+
+        // Highlight code causing the error
+        if (error.evidence) {
+          const evidenceStartPosition = selectedLine.text.indexOf(
+            error.evidence
+          );
+          diagnostic.from = selectedLine.from + evidenceStartPosition;
+          diagnostic.to =
+            selectedLine.from + evidenceStartPosition + error.evidence.length;
+        }
+
+        diagnostics.push(diagnostic);
+      });
+    }
+    return diagnostics;
+  });
+};
+
 ```
 
 Afterwards, update your main App.js code 
