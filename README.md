@@ -103,6 +103,9 @@ import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { html } from '@codemirror/lang-html';
 import { css } from '@codemirror/lang-css';
+import { sublime } from '@uiw/codemirror-theme-sublime';
+import { githubDark } from '@uiw/codemirror-theme-github';
+import { okaidia } from '@uiw/codemirror-theme-okaidia';
 
 export default function App() {
   const onChange = React.useCallback((value, viewUpdate) => {
@@ -185,7 +188,16 @@ export default myTheme;
 
 ### 7. Save to localStorage with undo history
 
+By editing the `onChange` and `initialState` props and by using the `localStorage` Web API, we can make the editor state persist across refreshes.
+
 ```js
+import React from 'react';
+import './style.css';
+
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { githubDark } from '@uiw/codemirror-theme-github';
+
 import { historyField } from '@codemirror/commands';
 
 // See [toJSON](https://codemirror.net/docs/ref/#state.EditorState.toJSON) documentation for more details
