@@ -1,5 +1,16 @@
 # Build an editor using CodeMirror with linting and autocomplete
 
+### Workshop Agenda
+
+* Why CodeMirror and how to choose a library
+* Basic setup for CodeMirror
+* Adding out of the box themes and custom ones
+* Adding your own linting
+* Adding general autocomplete
+* Adding more complex autocomplete
+* Adding completely custom autocomplete
+
+
 ### 1. Before you begin
 
 Build alongside us using Stackblitz `https://stackblitz.com/` and create a React instance
