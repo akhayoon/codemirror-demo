@@ -210,6 +210,44 @@ const myTheme = createTheme({
 export default myTheme;
 ```
 
+Your code should look like this now:
+
+```js
+import React from 'react';
+import './style.css';
+
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import customTheme from './customTheme';
+
+export default function App() {
+  const onChange = React.useCallback((value, viewUpdate) => {
+    console.log('value:', value);
+  }, []);
+  return (
+    <div>
+      <div>
+        <CodeMirror
+          value="console.log('hello world!');"
+          height="200px"
+          extensions={[javascript({})]}
+          onChange={onChange}
+        />
+      </div>
+      <div>
+        <CodeMirror
+          value="console.log('hello world!');"
+          height="200px"
+          extensions={[javascript({})]}
+          onChange={onChange}
+          theme={customTheme}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
 ### 7. Save to localStorage with undo history
 
 By editing the `onChange` and `initialState` props and by using the `localStorage` Web API, we can make the editor state persist across refreshes.
