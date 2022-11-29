@@ -17,7 +17,7 @@ Build alongside us using Stackblitz `https://stackblitz.com/` and create a React
 
 Or use your own environment and make sure you have `node` and `yarn` installed to get started.
 
-### 2. Install the main react-codemirror package
+### 2. Install the main react-codemirror package or add them directly on Stackblitz
 
 ```bash
 yarn add @uiw/react-codemirror
@@ -44,6 +44,18 @@ export default function App() {
       onChange={onChange}
     />
   );
+}
+```
+
+Add some basic styling in your `style.css` file
+
+```css
+.cm-theme {
+  margin: 10px 0;
+}
+
+.cm-editor {
+  border: 1px #aaa solid;
 }
 ```
 
