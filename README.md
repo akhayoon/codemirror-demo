@@ -330,7 +330,7 @@ const jsLinter = (lintOptions) => {
   });
 };
 
-export jsLinter
+export default jsLinter;
 
 ```
 
@@ -346,7 +346,7 @@ import { githubDark } from '@uiw/codemirror-theme-github';
 import { historyField } from '@codemirror/commands';
 import { lintGutter } from '@codemirror/lint';
 
-import jsLinter from './linter';
+import jsLinter from './jsLinter';
 
 // See [toJSON](https://codemirror.net/docs/ref/#state.EditorState.toJSON) documentation for more details
 const stateFields = { history: historyField };
