@@ -31,6 +31,7 @@ yarn add @codemirror/lang-javascript
 import React from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
+import './style.css';
 
 export default function App() {
   const onChange = React.useCallback((value, viewUpdate) => {
