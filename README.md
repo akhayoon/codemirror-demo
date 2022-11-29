@@ -385,6 +385,14 @@ export default function App() {
 }
 ```
 
+You can be less strict using the following `lintOptions`
+
+```js
+asi: true,
+expr: true,
+undef: false,
+```
+
 ### 8. Add your own autocomplete
 
 Create a new file called `completions.js` and put the following code inside of it
