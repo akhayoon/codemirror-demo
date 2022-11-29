@@ -296,7 +296,7 @@ export default function App() {
 
 ### 7. Add your own linter
 
-Create an export a file called `lint.js` and paste the following into it (then update depedencies)
+Create an export a file called `jsLinter.js` and paste the following into it (then update depedencies)
 
 ```js
 import { linter } from '@codemirror/lint';
@@ -305,7 +305,7 @@ import { JSHINT as jshint } from 'jshint';
 /**
  * Sets up the javascript linter. Documentation: https://codemirror.net/examples/lint/
  */
-export const jsLinter = (lintOptions) => {
+const jsLinter = (lintOptions) => {
   return linter((view) => {
     const diagnostics = [];
     const codeText = view.state.doc.toJSON();
@@ -323,22 +323,14 @@ export const jsLinter = (lintOptions) => {
           message: error.reason,
         };
 
-        // Highlight code causing the error
-        if (error.evidence) {
-          const evidenceStartPosition = selectedLine.text.indexOf(
-            error.evidence
-          );
-          diagnostic.from = selectedLine.from + evidenceStartPosition;
-          diagnostic.to =
-            selectedLine.from + evidenceStartPosition + error.evidence.length;
-        }
-
         diagnostics.push(diagnostic);
       });
     }
     return diagnostics;
   });
 };
+
+export jsLinter
 
 ```
 
@@ -354,7 +346,7 @@ import { githubDark } from '@uiw/codemirror-theme-github';
 import { historyField } from '@codemirror/commands';
 import { lintGutter } from '@codemirror/lint';
 
-import { jsLinter } from './linter';
+import jsLinter from './linter';
 
 // See [toJSON](https://codemirror.net/docs/ref/#state.EditorState.toJSON) documentation for more details
 const stateFields = { history: historyField };
