@@ -395,7 +395,7 @@ undef: false,
 
 ### 8. Add your own autocomplete
 
-Create a new file called `commentsCompletion.js` and put the following code inside of it
+Create a new file called `completeJSDoc.js` and put the following code inside of it
 
 ```js
 import { syntaxTree } from '@codemirror/language';
@@ -440,7 +440,7 @@ import { historyField } from '@codemirror/commands';
 import { lintGutter } from '@codemirror/lint';
 
 import jsLinter from './jsLinter';
-import commentsCompletion from './commentsCompletion';
+import completeJSDoc from './completeJSDoc';
 
 // See [toJSON](https://codemirror.net/docs/ref/#state.EditorState.toJSON) documentation for more details
 const stateFields = { history: historyField };
@@ -452,10 +452,13 @@ export default function App() {
   const lintOptions = {
     esversion: 11,
     browser: true,
+    asi: true,
+    expr: true,
+    undef: false,
   };
 
   const jsDocCompletions = javascriptLanguage.data.of({
-    autocomplete: commentsCompletion,
+    autocomplete: completeJSDoc,
   });
 
   return (
@@ -492,7 +495,7 @@ export default function App() {
 
 ### 9. Let's add a completion for the entire global scope
 
-Createa a file called `completeGlobalScope.js`
+Createa a file called `completeFromGlobalScope.js`
 
 ```js
 import { syntaxTree } from '@codemirror/language';
@@ -507,7 +510,7 @@ const dontCompleteIn = [
   'PropertyDefinition',
 ];
 
-export function completeFromGlobalScope(context: CompletionContext) {
+export default function completeFromGlobalScope(context: CompletionContext) {
   let nodeBefore = syntaxTree(context.state).resolveInner(context.pos, -1);
 
   if (
@@ -545,3 +548,73 @@ function completeProperties(from: number, object: Object) {
 }
 
 ````
+
+Your code should look like this now
+
+```js
+import React from 'react';
+import './style.css';
+
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript, javascriptLanguage } from '@codemirror/lang-javascript';
+import { githubDark } from '@uiw/codemirror-theme-github';
+import { historyField } from '@codemirror/commands';
+import { lintGutter } from '@codemirror/lint';
+
+import jsLinter from './jsLinter';
+import completeJSDoc from './completeJSDoc';
+import completeFromGlobalScope from './completeFromGlobalScope';
+
+// See [toJSON](https://codemirror.net/docs/ref/#state.EditorState.toJSON) documentation for more details
+const stateFields = { history: historyField };
+
+export default function App() {
+  const serializedState = localStorage.getItem('myEditorState');
+  const value = localStorage.getItem('myValue') || '';
+
+  const lintOptions = {
+    esversion: 11,
+    browser: true,
+    asi: true,
+    expr: true,
+    undef: false,
+  };
+
+  const jsDocCompletions = javascriptLanguage.data.of({
+    autocomplete: completeJSDoc,
+  });
+
+  const globalScopeCompletions = javascriptLanguage.data.of({
+    autocomplete: completeFromGlobalScope,
+  });
+
+  return (
+    <CodeMirror
+      value={value}
+      height={'300px'}
+      theme={githubDark}
+      extensions={[
+        javascript({}),
+        jsLinter(lintOptions),
+        lintGutter(),
+        jsDocCompletions,
+        globalScopeCompletions,
+      ]}
+      initialState={
+        serializedState
+          ? {
+              json: JSON.parse(serializedState || ''),
+              fields: stateFields,
+            }
+          : undefined
+      }
+      onChange={(value, viewUpdate) => {
+        localStorage.setItem('myValue', value);
+
+        const state = viewUpdate.state.toJSON(stateFields);
+        localStorage.setItem('myEditorState', JSON.stringify(state));
+      }}
+    />
+  );
+}
+```
