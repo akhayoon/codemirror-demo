@@ -395,7 +395,7 @@ undef: false,
 
 ### 8. Add your own autocomplete
 
-Create a new file called `completions.js` and put the following code inside of it
+Create a new file called `commentsCompletion.js` and put the following code inside of it
 
 ```js
 import { syntaxTree } from '@codemirror/language';
@@ -409,7 +409,7 @@ const tagOptions = [
   'type',
 ].map((tag) => ({ label: '@' + tag, type: 'keyword' }));
 
-export function completeJSDoc(context) {
+export default function completeJSDoc(context) {
   let nodeBefore = syntaxTree(context.state).resolveInner(context.pos, -1);
   if (
     nodeBefore.name != 'BlockComment' ||
@@ -439,8 +439,8 @@ import { githubDark } from '@uiw/codemirror-theme-github';
 import { historyField } from '@codemirror/commands';
 import { lintGutter } from '@codemirror/lint';
 
-import { jsLinter } from './linter';
-import { completeJSDoc } from './jsDocCompletion';
+import jsLinter from './jsLinter';
+import commentsCompletion from './commentsCompletion';
 
 // See [toJSON](https://codemirror.net/docs/ref/#state.EditorState.toJSON) documentation for more details
 const stateFields = { history: historyField };
@@ -455,7 +455,7 @@ export default function App() {
   };
 
   const jsDocCompletions = javascriptLanguage.data.of({
-    autocomplete: completeJSDoc,
+    autocomplete: commentsCompletion,
   });
 
   return (
