@@ -510,7 +510,7 @@ const dontCompleteIn = [
   'PropertyDefinition',
 ];
 
-export default function completeFromGlobalScope(context: CompletionContext) {
+export default function completeFromGlobalScope(context) {
   let nodeBefore = syntaxTree(context.state).resolveInner(context.pos, -1);
 
   if (
@@ -532,7 +532,7 @@ export default function completeFromGlobalScope(context: CompletionContext) {
   return null;
 }
 
-function completeProperties(from: number, object: Object) {
+function completeProperties(from, object) {
   let options = [];
   for (let name in object) {
     options.push({
