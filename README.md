@@ -618,3 +618,55 @@ export default function App() {
   );
 }
 ```
+
+### Custom Autocomplete
+
+```js
+import { autocompletion, completeFromList } from '@codemirror/autocomplete';
+import { syntaxTree } from '@codemirror/language';
+
+const keywords = 'customObject1 customVariable2'
+  .split(' ')
+  .map((kw) => ({ label: kw, type: 'keyword' }));
+
+export const simpleTextComplete = completeFromList([...keywords]);
+
+export default function completeCustom(context) {
+  const nodeBefore = syntaxTree(context.state).resolveInner(context.pos, -1);
+
+  const completionFor = ['PropertyName', '.', '?.'];
+
+  if (completionFor.includes(nodeBefore.name)) {
+    const object = nodeBefore?.parent?.getChild('Expression');
+    const variableName = context.state.sliceDoc(object?.from, object?.to);
+    const from = /\./.test(nodeBefore.name) ? nodeBefore.to : nodeBefore.from;
+
+    if (variableName === 'test') {
+      return {
+        from,
+        options: [{ label: 'sub' }],
+        validFor: /^[\w$]*$/,
+      };
+    }
+  }
+
+  const events = ['foo', 'bar', 'hello'];
+  const applyfunc = 'event => { \n  // your code here\n  \n}';
+  const object = nodeBefore?.parent?.parent;
+  const variableName = context.state.sliceDoc(object?.from, object?.to);
+  const from = /\(/.test(nodeBefore.name) ? nodeBefore.to : nodeBefore.from;
+  if (variableName.includes('test.sub(') && object.parent) {
+    const options = events.map((event) => ({
+      label: `"${event}"`,
+      // apply property allows us to complete the rest of the function
+      apply: `"${event}", ${applyfunc}`,
+    }));
+    return {
+      from,
+      options,
+      validFor: /^[\w$]*$/,
+    };
+  }
+}
+
+```
